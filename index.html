@@ -1,0 +1,2052 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Приложение</title>
+    <style>
+      /* Глобальные стили */
+      body, input, button, .list-item, .title, .modal, .breadcrumbs span, .detail-item, .container, .search-input {
+        font-family: 'Roboto', sans-serif;
+      }
+      .header h1 {
+        font-family: Arial, sans-serif;
+      }
+      .tile .badge, .room-tile .badge {
+        font-family: Arial, sans-serif;
+      }
+      
+      body {
+        margin: 0;
+        padding: 0;
+        background-color: #121212;
+        color: #fff;
+      }
+      /* Хедер. В нем слева кнопка обновления, затем заголовок (кликабельно – переход на Главную),
+         а справа контейнер с кнопкой "Назад" (расположенной ближе к гамбургеру) и кнопкой гамбургера */
+      .header {
+        display: flex;
+        align-items: center;
+        padding: 10px;
+        background-color: #1e1e1e;
+        margin-bottom: 10px;
+      }
+      .refresh-button {
+        font-size: 2.5rem;
+        background: none;
+        border: none;
+        color: #fff;
+        cursor: pointer;
+        margin-right: 5px;
+      }
+      .header h1 {
+        flex: 1;
+        text-align: center;
+        margin: 0;
+        cursor: pointer;
+      }
+      .header-right {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+      .back-button {
+        font-size: 3rem;
+        background: none;
+        border: none;
+        color: #fff;
+        cursor: pointer;
+      }
+      .menu-button {
+        background: none;
+        border: none;
+        color: #fff;
+        font-size: 3rem;
+        cursor: pointer;
+      }
+      
+      .search-container {
+        display: flex;
+        justify-content: center;
+        margin: 10px 0;
+      }
+      .search-input {
+        font-size: 22px;
+        color: #fff;
+        width: 70%;
+        height: 30px;
+        padding: 10px;
+        border-radius: 10px;
+        border: none;
+        outline: none;
+        background-color: #252b30;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        padding: 10px;
+      }
+      .tile {
+        position: relative;
+        width: 100%;
+        padding-bottom: 100%;
+        overflow: hidden;
+        cursor: pointer;
+      }
+      .tile-content {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+      }
+      .tile-content img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      .tile-content .title {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        font-size: 28px;
+        text-align: center;
+        padding: 2px 0;
+      }
+      .tile .badge {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        background-color: #FFD700;
+        color: #000;
+        padding: 2px 5px;
+        border-radius: 15px;
+        font-size: 1.2rem;
+      }
+      .room-tile {
+        width: 90%;
+        padding: 35px;
+        background-color: #1e1e1e;
+        border-radius: 10px;
+        margin-bottom: 10px;
+        position: relative;
+        cursor: pointer;
+        font-size: 3rem;
+      }
+      .room-title {
+        padding-bottom: 10px;
+      }
+      .warn-icon {
+        margin-left: 10px;
+        font-size: 0.8em;
+      }
+      .room-tile .badge {
+        position: absolute;
+        top: 5px;
+        right: 10px;
+        background-color: #FFD700;
+        color: #000;
+        padding: 2px 5px;
+        border-radius: 15px;
+        font-size: 1.2rem;
+      }
+      .add-button {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background-color: #1e1e1e;
+        border: none;
+        border-radius: 50%;
+        width: 150px;
+        height: 150px;
+        font-size: 90px;
+        color: #fff;
+        cursor: pointer;
+      }
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 2000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0,0,0,0.7);
+      }
+      .modal-content {
+        position: relative;
+        background-color: #1e1e1e;
+        margin: 15% auto;
+        padding: 30px;
+        border-radius: 10px;
+        width: 80%;
+        max-width: 600px;
+      }
+      .modal input,
+      .modal textarea {
+        width: 97%;
+        padding: 10px;
+        margin: 5px 0;
+        border-radius: 5px;
+        border: none;
+      }
+      .modal-content input,
+      .modal-content textarea {
+        margin-bottom: 15px;
+      }
+      .modal-content button {
+        margin-top: 15px;
+      }
+      .modal button {
+        padding: 10px;
+        width: 100%;
+        margin-top: 10px;
+        background-color: #FFD700;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+      .close {
+        position: absolute;
+        top: 5px;
+        right: 10px;
+        color: #fff;
+        font-size: 24px;
+        cursor: pointer;
+      }
+      .list { padding: 10px; }
+      .list-item {
+        font-size: 3rem;
+        padding: 10px;
+        border-bottom: 1px solid #444;
+      }
+      .detail-item {
+        font-size: 2.5rem;
+      }
+      .breadcrumbs { 
+        padding: 10px;
+        font-size: 1.5em;
+        margin-top: 20px;
+        margin-bottom: 20px;
+      }
+      .breadcrumbs span { 
+        color: #FFD700; 
+        cursor: pointer; 
+      }
+      .container { padding: 20px; }
+      /* Стили для полей формы на странице добавления жильца */
+      .container input, 
+      .container textarea, 
+      .container button {
+        width: 100%;
+        margin-bottom: 15px;
+        padding: 10px;
+        border-radius: 5px;
+        border: none;
+        font-size: 1.8rem;
+        box-sizing: border-box;
+      }
+      .container input, .container textarea {
+        background-color: #252b30;
+        color: #fff;
+      }
+      .container button {
+        background-color: #FFD700;
+        color: #000;
+        cursor: pointer;
+        font-size: 2rem;
+      }
+      .field-group { position: relative; }
+      .suggestions {
+        background-color: #1e1e1e;
+        border: 1px solid #444;
+        border-radius: 5px;
+        max-height: 100px;
+        overflow-y: auto;
+        position: absolute;
+        width: calc(100% - 42px);
+        z-index: 100;
+      }
+      .suggestion-item { padding: 10px; cursor: pointer; }
+      .hidden { display: none; }
+      
+      /* Контекстное меню и выпадающие списки переселения */
+      .context-menu {
+        position: fixed;
+        background-color: #1e1e1e;
+        border: 1px solid #444;
+        border-radius: 5px;
+        padding: 15px;
+        z-index: 1000;
+        width: 300px;
+      }
+      .context-menu button {
+        display: block;
+        width: 100%;
+        margin-bottom: 10px;
+        background-color: #FFD700;
+        border: none;
+        border-radius: 5px;
+        padding: 15px;
+        font-size: 1.5rem;
+        color: #000;
+      }
+      .context-menu button:last-child {
+        margin-bottom: 0;
+      }
+      .dropdown {
+        position: fixed;
+        background-color: #1e1e1e;
+        border: 1px solid #444;
+        border-radius: 5px;
+        padding: 15px;
+        z-index: 1001;
+        width: 300px;
+        overflow-y: auto;
+        max-height: 300px;
+      }
+      .dropdown button {
+        display: block;
+        width: 100%;
+        margin-bottom: 10px;
+        background-color: #FFD700;
+        border: none;
+        border-radius: 5px;
+        padding: 15px;
+        font-size: 1.5rem;
+        color: #000;
+      }
+      .dropdown button:last-child {
+        margin-bottom: 0;
+      }
+      
+      .highlight {
+        background-color: #333 !important;
+      }
+      
+      #logList .list-item {
+        font-size: 2rem;
+        line-height: 1;
+        padding: 5px 10px;
+      }
+      
+      #overviewContainer {
+        font-size: 2.1em;
+      }
+
+      #samoplatceCheckbox {
+        -webkit-appearance: checkbox;
+        appearance: checkbox;
+        width: 30px;
+        height: 30px;
+        margin-right: 0.5em;
+        margin-top: 14px;
+      }
+
+      .tile,
+      .list-item,
+      .room-tile,
+      .title {
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        -webkit-touch-callout: none; /* отключает контекстное меню в iOS */
+      }
+
+      .tile-content img {
+        pointer-events: none;
+      }
+
+      /* Увеличение размеров модальных окон для добавления/редактирования общежития и комнаты */
+      #dormModal .modal-content,
+      #roomModal .modal-content {
+        width: 90%;           /* увеличиваем ширину модального окна */
+        max-width: 700px;      /* максимальная ширина — больше чем 600px */
+        padding: 40px;         /* большее внутреннее расстояние для комфортного размещения элементов */
+        font-size: 2rem;       /* увеличение базового размера шрифта для всего содержимого модального окна */
+      }
+
+      /* Увеличение размеров полей ввода и кнопок внутри модальных окон */
+      #dormModal .modal input,
+      #dormModal .modal textarea,
+      #dormModal .modal button,
+      #roomModal .modal input,
+      #roomModal .modal textarea,
+      #roomModal .modal button {
+        font-size: 2rem;
+        padding: 15px;
+      }
+
+      /* Увеличение шрифта подсказок (placeholder) в полях ввода */
+      input::placeholder,
+      textarea::placeholder {
+        font-size: 1.6rem;
+      }
+
+      /* Увеличение шрифта кнопок */
+      button {
+        font-size: 1.6rem;
+      }
+
+      /* Уменьшение шапки модального окна (заголовок) */
+      .modal-content h3 {
+        font-size: 2.2rem; /* уменьшено по сравнению с исходным значением */
+      }
+
+      /* Увеличение высоты полей и кнопок, а также расстояния между ними внутри контейнера */
+      .container input,
+      .container textarea,
+      .container button {
+        padding: 15px;          /* если ранее было 10px, теперь 15px */
+        margin-bottom: 22.5px;  /* если ранее было 15px, теперь 1.5 раза больше – 22.5px (можно округлить до 23px) */
+      }
+
+      input, 
+      textarea, 
+      select {
+        font-size: 30px; /* или больше, если необходимо */
+      }
+
+      /* иконка «переселения» рядом с датой выселения */
+      .relocate-icon {
+        display: inline-block;
+        font-size: 0.6em;
+        margin-left: 0.3em;
+        vertical-align: middle;
+      }
+
+      .inactive-room {
+        cursor: default;
+      }
+
+      /* Всплывающее ненавязчивое сообщение (тоаст) — центр экрана, во всю ширину, шрифт ×2 */
+      .toast {
+        position: fixed;
+        top: 50%;
+        left: 0;
+        transform: translateY(-50%);
+        width: 100%;
+        background-color: #333;
+        color: #fff;
+        padding: 12px 20px;
+        font-size: 2.1rem;      /* было 1.4rem → теперь в 2 раза больше */
+        text-align: center;     /* чтобы текст был по центру */
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s ease-in-out;
+        z-index: 3000;
+        white-space: pre-wrap;
+      }
+      .toast.show {
+        opacity: 1;
+      }
+
+      /* Для модалок «Переселение» и «Выселение» */
+      #relocateModalMessage,
+      #evictModalMessage {
+        font-size: 1.8rem;
+        line-height: 1.2;
+      }
+
+    </style>
+  </head>
+  <body>
+    
+    <!-- Глобальные переменные -->
+    <script>
+      window.allData = <?!= JSON.stringify(allData) ?>;
+      window.dormitories = allData.dormitories;
+      window.rooms = allData.rooms;
+      window.residents = allData.residents;
+      window.logs = allData.logs;
+      
+      function parseDate(dateStr) {
+        if (dateStr.indexOf('T') !== -1) {
+          return new Date(dateStr);
+        } else if (dateStr.indexOf('.') !== -1) {
+          var parts = dateStr.split('.');
+          return new Date(parts[2], parts[1]-1, parts[0]);
+        } else {
+          return new Date(dateStr);
+        }
+      }
+      function formatDateString(dateInput) {
+        var d = (typeof dateInput === "string") ? parseDate(dateInput) : dateInput;
+        var day = ('0' + d.getDate()).slice(-2);
+        var month = ('0' + (d.getMonth() + 1)).slice(-2);
+        var year = d.getFullYear();
+        return day + '.' + month + '.' + year;
+      }
+
+      window.currentUserEmail = "<?= currentUserEmail ?>";
+      
+    </script>
+    
+    <!-- Основной контейнер -->
+    <div id="app"></div>
+    
+    <!-- Контекстные меню -->
+    <div id="residentContextMenu" class="context-menu hidden">
+      <button onclick="contextEditResident()">Редактировать</button>
+      <button onclick="contextRelocateResident()">Переселить</button>
+      <button onclick="contextResettleResident()">Перезаселить</button>
+      <button onclick="contextEvictResident()">Выселить</button>
+      <button onclick="contextMarkForDeletion()">На удаление</button>
+      <button onclick="contextDeleteResident()">Удалить</button>
+      <button onclick="contextResidentInstruction()">ℹ️ Инструкция</button>
+    </div>
+    <div id="dormContextMenu" class="context-menu hidden">
+      <button onclick="contextEditDormitory()">Редактировать</button>
+    </div>
+    <div id="roomContextMenu" class="context-menu hidden">
+      <button onclick="contextEditRoom()">Редактировать</button>
+    </div>
+    <div id="relocateDormitoryDropdown" class="dropdown hidden"></div>
+    <div id="relocateRoomDropdown" class="dropdown hidden"></div>
+    
+    <!-- Главное меню (гамбургер) -->
+    <div id="mainMenuDropdown" class="dropdown hidden">
+      <button onclick="navigate('logs'); document.getElementById('mainMenuDropdown').classList.add('hidden');">Логи</button>
+      <button onclick="navigate('overview'); document.getElementById('mainMenuDropdown').classList.add('hidden');">Обзор</button>
+      <button onclick="navigate('instruction'); document.getElementById('mainMenuDropdown').classList.add('hidden');">Инструкция</button>
+    </div>
+
+    <!-- Модальное окно для подтверждения переселения с выбором даты -->
+    <div id="relocateModal" class="modal">
+      <div class="modal-content">
+        <span class="close" onclick="closeRelocateModal()">&times;</span>
+        <h3 id="relocateModalTitle">Переселение жильца</h3>
+        <p id="relocateModalMessage">Вы действительно хотите переселить ?</p>
+        <input type="date" id="relocateDate" placeholder="Дата переселения">
+        <button onclick="confirmRelocation()">Подтвердить</button>
+        <button onclick="closeRelocateModal()">Отмена</button>
+      </div>
+    </div>
+    
+    <!-- Модальное окно для подтверждения выселения с выбором даты -->
+    <div id="evictModal" class="modal">
+      <div class="modal-content">
+        <span class="close" onclick="closeEvictModal()">&times;</span>
+        <h3 id="evictModalTitle">Выселение жильца</h3>
+        <p id="evictModalMessage">Вы действительно хотите выселить ?</p>
+        <input type="date" id="evictDate" placeholder="Дата выселения">
+        <button onclick="confirmEvictionModal()">Подтвердить</button>
+        <button onclick="closeEvictModal()">Отмена</button>
+      </div>
+    </div>
+
+    <!-- Модальное окно для пометки на удаление -->
+    <div id="markModal" class="modal">
+      <div class="modal-content">
+        <span class="close" onclick="closeMarkModal()">&times;</span>
+        <h3>Пометка на удаление</h3>
+        <p>Вы действительно хотите пометить этого жильца для удаления?</p>
+        <button onclick="confirmMarkDeletion()">Да</button>
+        <button onclick="closeMarkModal()">Нет</button>
+      </div>
+    </div>
+    
+    <!-- Шаблоны страниц -->
+    <!-- Шаблон для главной страницы (index) -->
+    <script type="text/template" id="template-index">
+      <div class="header">
+        <button class="refresh-button" onclick="//location.reload();">&#x21bb;</button>
+        <h1 onclick="navigate('index');" style="cursor:pointer; margin-right:10px;">Общежития</h1>
+        <button class="back-button" onclick="navigate('index');" style="margin-right:5px;">&#x2190;</button>
+        <button id="menuButton" class="menu-button">≡</button>
+      </div>
+      <div class="search-container">
+        <input type="text" id="searchInput" class="search-input" placeholder="Поиск жильцов...">
+      </div>
+      <div class="grid" id="dormGrid"></div>
+      <button class="add-button" onclick="openAddDormitoryModal()">+</button>
+      <div id="dormModal" class="modal">
+        <div class="modal-content">
+          <span class="close" onclick="closeDormModal()">&times;</span>
+          <h3 id="dormModalTitle">Новое общежитие</h3>
+          <input type="text" id="dormNameInput" placeholder="Название общежития">
+          <!-- Новое поле для города -->
+          <input type="text" id="dormCityInput" placeholder="Город">
+          <input type="text" id="dormImageInput" placeholder="URL картинки">
+          <label style="display:flex; align-items:center; margin:10px 0;">
+            <input type="checkbox" id="dormInactiveCheckbox" style="width:30px; height:30px; margin-right:10px;">
+            <span>Неактивно</span>
+          </label>
+          <button onclick="saveDormitory()">Сохранить</button>
+        </div>
+      </div>
+    </script>
+    
+    <!-- Шаблон для страницы комнат (rooms) -->
+    <script type="text/template" id="template-rooms">
+      <div class="header">
+        <div class="header-left">
+          <button class="refresh-button" onclick="//location.reload();">&#x21bb;</button>
+        </div>
+        <h1 onclick="navigate('index');" style="cursor:pointer;">Комнаты</h1>
+        <div class="header-right">
+          <button class="back-button" onclick="navigate('index');">&#x2190;</button>
+          <button id="menuButton" class="menu-button">≡</button>
+        </div>
+      </div>
+      <div class="breadcrumbs">
+        <span id="breadcrumbDormitory" onclick="navigate('rooms', {dormitoryId: currentParams.dormitoryId})">Общежитие</span>
+      </div>
+      <div id="roomGrid"></div>
+      <button class="add-button" onclick="openAddRoomModal()">+</button>
+      <div id="roomModal" class="modal">
+        <div class="modal-content">
+          <span class="close" onclick="closeRoomModal()">&times;</span>
+          <h3 id="roomModalTitle">Новая комната</h3>
+          <input type="text" id="roomNameInput" placeholder="Название комнаты">
+          <input type="number" id="roomCapacityInput" placeholder="Максимальное количество мест">
+          <label style="display:flex; align-items:center; margin:10px 0;">
+            <input type="checkbox" id="roomInactiveCheckbox" style="width:30px; height:30px; margin-right:10px;">
+            <span>Неактивна</span>
+          </label>
+          <button onclick="saveRoom()">Сохранить</button>
+        </div>
+      </div>
+    </script>
+    
+    <!-- Шаблон для страницы жильцов (residents) -->
+    <script type="text/template" id="template-residents">
+      <div class="header">
+        <div class="header-left">
+          <button class="refresh-button" onclick="//location.reload();">&#x21bb;</button>
+        </div>
+        <h1 onclick="navigate('index');" style="cursor:pointer;">Жильцы</h1>
+        <div class="header-right">
+          <button class="back-button" onclick="navigate('rooms', {dormitoryId: currentParams.dormitoryId});">&#x2190;</button>
+          <button id="menuButton" class="menu-button">≡</button>
+        </div>
+      </div>
+      <div class="breadcrumbs">
+        <span id="breadcrumbDormitory" onclick="navigate('rooms', {dormitoryId: currentParams.dormitoryId})">Общежитие</span> &gt;
+        <span id="breadcrumbRoom" onclick="navigate('residents', {roomId: currentParams.roomId, dormitoryId: currentParams.dormitoryId})">Комната</span>
+      </div>
+      <div class="list" id="residentList"></div>
+      <button class="add-button" onclick="navigate('addResident', {roomId: currentParams.roomId, dormitoryId: currentParams.dormitoryId})">+</button>
+    </script>
+    
+    <!-- Шаблон для страницы информации о жильце (resident) -->
+    <script type="text/template" id="template-resident">
+      <div class="header">
+        <div class="header-left">
+          <button class="refresh-button" onclick="//location.reload();">&#x21bb;</button>
+        </div>
+        <h1 onclick="navigate('index');" style="cursor:pointer;">Информация о жильце</h1>
+        <div class="header-right">
+          <button class="back-button" onclick="navigate('residents', {roomId: currentParams.roomId, dormitoryId: currentParams.dormitoryId});">&#x2190;</button>
+          <button id="menuButton" class="menu-button">≡</button>
+        </div>
+      </div>
+      <div class="breadcrumbs">
+        <span id="breadcrumbDormitory" onclick="navigate('rooms', {dormitoryId: currentParams.dormitoryId})">Общежитие</span> &gt;
+        <span id="breadcrumbRoom" onclick="navigate('residents', {roomId: currentParams.roomId, dormitoryId: currentParams.dormitoryId})">Комната</span> &gt;
+        <span id="residentName">Жилец</span>
+      </div>
+      <div class="details" id="residentDetails"></div>
+    </script>
+    
+    <!-- Шаблон для страницы добавления/редактирования жильца (addResident) -->
+    <script type="text/template" id="template-addResident">
+      <div class="header">
+        <div class="header-left">
+          <button class="refresh-button" onclick="//location.reload();">&#x21bb;</button>
+        </div>
+        <h1 onclick="navigate('index');" style="cursor:pointer;" id="pageTitle">Добавить жильца</h1>
+        <div class="header-right">
+          <button class="back-button" onclick="navigate('residents', {roomId: currentParams.roomId, dormitoryId: currentParams.dormitoryId});">&#x2190;</button>
+          <button id="menuButton" class="menu-button">≡</button>
+        </div>
+      </div>
+      <div class="container">
+        <input type="date" id="checkInDate" placeholder="Дата заселения">
+        <div class="field-group">
+          <input type="text" id="surname" placeholder="Фамилия" onkeyup="showSuggestions()">
+          <div id="surnameSuggestions" class="suggestions"></div>
+        </div>
+        <div class="field-group">
+          <input type="text" id="name" placeholder="Имя" onkeyup="showSuggestions()">
+          <div id="nameSuggestions" class="suggestions"></div>
+        </div>
+        <input type="text" id="phone" placeholder="Номер телефона (без +)">
+        <input type="number"
+              id="uniquePrice"
+              placeholder="Уникальная цена жилья (причина в примечании)"
+              step="0.01"
+              style="margin-bottom:15px;"
+        >
+        <textarea id="note" placeholder="Примечание"></textarea>
+        <label style="font-size:1.8rem; margin-bottom:15px; display:inline-flex; align-items:center; background-color:#252b30; padding:10px; border-radius:5px;">
+          <input type="checkbox" id="samoplatceCheckbox">
+          <span style="color:#fff;">Samoplatce</span>
+        </label>
+        <button onclick="saveResident()">Заселить</button>
+      </div>
+    </script>
+    
+    <!-- Шаблон для страницы выселения жильца (evictResident) -->
+    <script type="text/template" id="template-evictResident">
+      <div class="header">
+        <div class="header-left">
+          <button class="refresh-button" onclick="//location.reload();">&#x21bb;</button>
+        </div>
+        <h1 onclick="navigate('index');" style="cursor:pointer;">Выселение жильца</h1>
+        <div class="header-right">
+          <button class="back-button" onclick="navigate('residents', {roomId: currentParams.roomId, dormitoryId: currentParams.dormitoryId});">&#x2190;</button>
+          <button id="menuButton" class="menu-button">≡</button>
+        </div>
+      </div>
+      <div class="container">
+        <p id="evictModalMessage">Вы действительно хотите выселить ?</p>
+        <input type="date" id="evictDate" placeholder="Дата выселения">
+        <button onclick="confirmEvictionModal()">Подтвердить</button>
+        <button onclick="closeEvictModal()">Отмена</button>
+      </div>
+    </script>
+    
+    <!-- Шаблон для страницы результатов поиска (search) -->
+    <script type="text/template" id="template-search">
+      <div class="header">
+        <div class="header-left">
+          <button class="refresh-button" onclick="//location.reload();">&#x21bb;</button>
+        </div>
+        <h1 onclick="navigate('index');" style="cursor:pointer;">Результаты поиска</h1>
+        <div class="header-right">
+          <button class="back-button" onclick="navigate('index');">&#x2190;</button>
+          <button id="menuButton" class="menu-button">≡</button>
+        </div>
+      </div>
+      <div class="list" id="searchResultsList"></div>
+    </script>
+    
+    <!-- Шаблон для страницы логов (logs) -->
+    <script type="text/template" id="template-logs">
+      <div class="header">
+        <div class="header-left">
+          <button class="refresh-button" onclick="//location.reload();">&#x21bb;</button>
+        </div>
+        <h1 onclick="navigate('index');" style="cursor:pointer;">Логи</h1>
+        <div class="header-right">
+          <button class="back-button" onclick="navigate('index');">&#x2190;</button>
+          <button id="menuButton" class="menu-button">≡</button>
+        </div>
+      </div>
+      <div class="list" id="logList"></div>
+    </script>
+
+    <!-- Шаблон для страницы инструкции -->
+    <script type="text/template" id="template-instruction">
+      <div class="header">
+        <div class="header-left">
+          <button class="refresh-button" onclick="//location.reload();">&#x21bb;</button>
+        </div>
+        <h1 onclick="navigate('index');" style="cursor:pointer;">Инструкция</h1>
+        <div class="header-right">
+          <button class="back-button" onclick="navigate('index');">&#x2190;</button>
+          <button id="menuButton" class="menu-button">≡</button>
+        </div>
+      </div>
+      <div class="container" style="font-size: 1.6em;">
+        <h1>Инструкция по использованию программы управления общежитиями</h1>
+
+        <h2>1. Авторизация</h2>
+        <p>Откройте приложение и авторизуйтесь, используя ваш корпоративный аккаунт Google.<br>
+        Если вашему аккаунту не предоставлен доступ, вы получите сообщение о запрете доступа.</p>
+
+        <h2>2. Основные функции приложения</h2>
+
+        <h3>Общежития</h3>
+        <ul>
+          <li>После входа вы увидите список общежитий.</li>
+          <li>Для добавления нового общежития используйте кнопку <strong>«+»</strong> в правом нижнем углу экрана.</li>
+          <li>Чтобы отредактировать информацию об общежитии, выполните долгое нажатие на его плитку.</li>
+        </ul>
+
+        <h3>Комнаты</h3>
+        <ul>
+          <li>Нажмите на плитку общежития, чтобы просмотреть список комнат.</li>
+          <li>Для добавления новой комнаты используйте кнопку <strong>«+»</strong>.</li>
+          <li>Долгое нажатие на комнату позволяет редактировать её данные.</li>
+        </ul>
+
+        <h3>Жильцы</h3>
+        <ul>
+          <li>Нажмите на комнату, чтобы увидеть список жильцов.</li>
+          <li>Для заселения нового жильца используйте кнопку <strong>«+»</strong>.</li>
+          <li>Долгое нажатие на имя жильца открывает меню:
+            <ul>
+              <li><strong>Редактировать</strong> — изменить данные жильца.</li>
+              <li><strong>Переселить</strong> — переместить жильца в другую комнату или общежитие.</li>
+              <li><strong>Перезаселить</strong> — переместить жильца в другую (или ту же) комнату или общежитие, после чего до момента наступа, он не будет платить за проживание. Указывается дата первого дня бесплатного проживания.</li>
+              <li><strong>Выселить</strong> — указать дату выселения жильца.</li>
+              <li><strong>На удаление</strong> — пометить жильца для последующего удаления.</li>
+              <li><strong>Удалить</strong> — полностью удалить жильца (доступно только для администратора <strong>dmitrii.bogdanov@humanasset.cz</strong>).</li>
+              <li><strong>Информация</strong> — краткая информация о функциях переселения и перезаселения.</li>
+            </ul>
+          </li>
+        </ul>
+
+        <h3>Поиск жильцов</h3>
+        <p>На главной странице используйте поле поиска для быстрого нахождения жильцов по имени или фамилии. Для поиска не обязательно вводить имя или фамилию полностью.</p>
+
+        <h2>3. Просмотр информации и отчётов</h2>
+        <p>Используйте кнопку меню <strong>(≡)</strong> для:</p>
+        <ul>
+          <li>Просмотра логов изменений (<strong>«Логи»</strong>).</li>
+          <li>Общего обзора заселенных жильцов (<strong>«Обзор»</strong>).</li>
+        </ul>
+
+        <h2>4. Заселение жильцов</h2>
+        <ul>
+          <li><strong>Обычное заселение:</strong> Для жильцов, планируемых на следующий наступ, выполняйте заселение стандартным образом.</li>
+          <li><strong>Самостоятельная оплата жилья:</strong> При заселении жильца, оплачивающего жильё самостоятельно, отметьте чекбокс <strong>«samoplatce»</strong>.</li>
+        </ul>
+
+        <h2>5. Корректность данных при заселении</h2>
+        <p>При заселении нового жильца обязательно вписывайте его <strong>фамилию и имя точно как в паспорте</strong>.<br>
+        Если он уже работает, можете свериться с <strong>эвиденцией</strong>.<br>
+        Ошибки в написании могут привести к <strong>некорректному начислению платы за проживание</strong>.</p>
+
+        <h2>6. Важные примечания</h2>
+        <ul>
+          <li>Заполняйте все обязательные поля при заселении (дата заселения, фамилия, имя).</li>
+          <li>Перед добавлением нового жильца убедитесь, что он не проживает уже в другой комнате или общежитии. В противном случае система выдаст сообщение об ошибке, и вы не сможете добавить этого жильца до устранения конфликта.</li>
+        </ul>
+
+        <h2>7. История изменений</h2>
+        <ul>
+          <li>Тут будет история изменений</li>
+          <li><strong>25.07.2025.</strong> Добавлены функция перезаселения и краткая инструкция в контекстное меню жильца. Добавлены изменения в общую инструкцию.</li>
+        </ul>
+      </div>
+    </script>
+
+    <!-- Шаблон для страницы обзора (overview) -->
+    <script type="text/template" id="template-overview">
+      <div class="header">
+        <div class="header-left">
+          <button class="refresh-button" onclick="//location.reload();">&#x21bb;</button>
+        </div>
+        <h1 onclick="navigate('index');" style="cursor:pointer;">Обзор жильцов</h1>
+        <div class="header-right">
+          <button class="back-button" onclick="navigate('index');">&#x2190;</button>
+          <button id="menuButton" class="menu-button">≡</button>
+        </div>
+      </div>
+      <div class="container" id="overviewContainer"></div>
+    </script>
+    
+    <!-- Скрипт основной логики -->
+    <script>
+      var currentView = "";
+      var currentParams = {};
+      var contextMenuOpen = false;
+      var selectedResident = null;
+      var selectedTileElement = null;
+      var selectedDormitory = null;
+      var selectedDormTileElement = null;
+      var selectedRoom = null;
+      var selectedRoomTileElement = null;
+      let editingRoomId = null;
+      let editingDormId = null;
+      var currentRelocateTarget = { dormitoryId: null, roomId: null };
+
+      function navigate(view, params) {
+        params = params || {};
+        currentParams = params;
+        history.pushState({view: view, params: params}, '', '?view=' + view + '&' + new URLSearchParams(params).toString());
+        renderView(view, params);
+      }
+      
+      window.onpopstate = function(event) {
+        if (event.state) {
+          currentParams = event.state.params || {};
+          renderView(event.state.view, event.state.params);
+        } else {
+          renderView('index');
+        }
+      };
+      
+      function renderView(view, params) {
+        currentView = view;
+        var template = document.getElementById('template-' + view);
+        if (!template) {
+          console.error("Template for view '" + view + "' not found.");
+          return;
+        }
+        document.getElementById('app').innerHTML = template.innerHTML;
+        var menuBtn = document.getElementById("menuButton");
+        if (menuBtn) {
+          menuBtn.addEventListener("click", function(e) {
+            e.stopPropagation();
+            showMainMenuDropdown(e);
+          });
+        }
+        if (view === 'index') {
+          initIndexView();
+        } else if (view === 'rooms') {
+          initRoomsView(params);
+        } else if (view === 'residents') {
+          initResidentsView(params);
+        } else if (view === 'resident') {
+          initResidentView(params);
+        } else if (view === 'addResident') {
+          initAddResidentView(params);
+        } else if (view === 'evictResident') {
+          initEvictResidentView(params);
+        } else if (view === 'logs') {
+          initLogsView();
+        } else if (view === 'overview') {
+          initOverviewView();
+        } else if (view === 'search') {
+          initSearchView(params);
+        } else if (view === 'instruction') {
+          initInstructionView();
+        }
+      }
+
+      function initIndexView() {
+        renderDormitories();
+        var searchInput = document.getElementById("searchInput");
+        searchInput.addEventListener("keydown", function(e) {
+          if (e.key === "Enter") {
+            var query = searchInput.value.trim();
+            navigate('search', {query: query});
+          }
+        });
+      }
+      
+      function renderDormitories() {
+        const grid = document.getElementById('dormGrid');
+        grid.innerHTML = '';
+
+        // Группируем по городу
+        const grouped = {};
+        dormitories.forEach(dorm => {
+          const city = dorm[2] || 'Без города';
+          if (!grouped[city]) grouped[city] = [];
+          grouped[city].push(dorm);
+        });
+
+        Object.keys(grouped).sort().forEach(city => {
+          // Заголовок
+          const header = document.createElement('h2');
+          header.textContent = city;
+          header.style.gridColumn = '1 / -1';
+          header.style.textAlign = 'center';
+          grid.appendChild(header);
+
+          grouped[city].forEach(dorm => {
+            const tile = document.createElement('div');
+            tile.className = 'tile';
+
+            // если неактивно — делаем полупрозрачным, но НЕ блокируем события
+            if (!dorm[4]) {
+              tile.style.opacity = '0.5';
+              tile.classList.add('inactive-room');
+            }
+
+            // обычный клик — только если активна
+            tile.addEventListener('click', () => {
+              if (dorm[4]) {
+                navigate('rooms', { dormitoryId: dorm[0] });
+              }
+            });
+
+            // long-press (touchstart + задержка)
+            let pressTimer;
+            tile.addEventListener('touchstart', e => {
+              selectedDormTileElement = tile;
+              selectedDormitory = dorm;
+              pressTimer = setTimeout(() => {
+                e.preventDefault();
+                tile.classList.add('highlight');
+                showDormContextMenu(dorm, e.touches[0].clientY);
+              }, 800);
+            });
+            tile.addEventListener('touchend', () => clearTimeout(pressTimer));
+
+            // правый клик на десктопе
+            tile.addEventListener('contextmenu', e => {
+              e.preventDefault();
+              selectedDormTileElement = tile;
+              selectedDormitory = dorm;
+              tile.classList.add('highlight');
+              showDormContextMenu(dorm, e.clientY);
+            });
+
+            // содержимое плитки
+            const content = document.createElement('div');
+            content.className = 'tile-content';
+            const img = document.createElement('img');
+            img.src = dorm[3] || 'https://via.placeholder.com/150';
+            content.appendChild(img);
+            const title = document.createElement('div');
+            title.className = 'title';
+            title.textContent = dorm[1];
+            content.appendChild(title);
+            tile.appendChild(content);
+
+            // бейдж заполненности
+            const badge = document.createElement('div');
+            badge.className = 'badge';
+            const dormRooms = rooms.filter(r => r[1] == dorm[0]);
+            const totalCap = dormRooms.reduce((sum, r) => sum + parseInt(r[3],10), 0);
+            const occupied = dormRooms.reduce((sum, r) =>
+              sum + residents.filter(v => v[2]==r[0] && (v[9]==='active'||v[9]==='samoplatce')).length
+            , 0);
+            badge.textContent = `${occupied}/${totalCap}`;
+            tile.appendChild(badge);
+
+            grid.appendChild(tile);
+          });
+        });
+      }
+      
+      function initRoomsView(params) {
+        var dormitoryId = params.dormitoryId;
+        window.currentRooms = rooms.filter(function(room) {
+          return room[1] == dormitoryId;
+        });
+        renderRooms();
+        var dorm = dormitories.find(function(d) { return d[0] == dormitoryId; });
+        if (dorm) {
+          document.getElementById("breadcrumbDormitory").textContent = dorm[1];
+        }
+      }
+      
+      function renderRooms() {
+        const grid = document.getElementById('roomGrid');
+        grid.innerHTML = '';
+
+        currentRooms.forEach(room => {
+          const tile = document.createElement('div');
+          tile.className = 'room-tile';
+
+          // Активность
+          const dorm = dormitories.find(d => d[0] == room[1]);
+          const roomActive = room[4] && dorm && dorm[4];
+          if (!roomActive) {
+            tile.style.opacity = '0.5';
+            tile.classList.add('inactive-room');
+          }
+
+          // обычный клик
+          tile.addEventListener('click', () => {
+            if (roomActive) navigate('residents', { roomId: room[0], dormitoryId: room[1] });
+          });
+
+          // long-press (touch)
+          let roomPressTimer, longPressTriggered = false;
+          tile.addEventListener('touchstart', e => {
+            longPressTriggered = false;
+            selectedRoomTileElement = tile;
+            selectedRoom = room;
+            roomPressTimer = setTimeout(() => {
+              longPressTriggered = true;
+              e.preventDefault();
+              tile.classList.add('highlight');
+              showRoomContextMenu(room, e.touches[0].clientY);
+            }, 800);
+          });
+          tile.addEventListener('touchend', e => { clearTimeout(roomPressTimer); });
+
+          // правый клик (десктоп)
+          tile.addEventListener('contextmenu', e => {
+            e.preventDefault();
+            selectedRoomTileElement = tile;
+            selectedRoom = room;
+            tile.classList.add('highlight');
+            showRoomContextMenu(room, e.clientY);
+          });
+
+          // --- ВАЖНО: считаем, есть ли уникальная цена у кого-то в комнате ---
+          const hasUnique = residents.some(v =>
+            v[2] == room[0] &&
+            (v[9] === 'active' || v[9] === 'samoplatce') &&
+            v[10] != null &&
+            String(v[10]).trim() !== '' &&
+            Number(v[10]) > 0
+          );
+
+          // содержимое плитки
+          const title = document.createElement('div');
+          title.className = 'room-title';
+          title.textContent = room[2];
+          if (!roomActive) title.style.color = '#888';
+
+          // если есть уникальная цена — добавляем значок ⚠️
+          if (hasUnique) {
+            const warn = document.createElement('span');
+            warn.className = 'warn-icon';
+            warn.textContent = '⚠️'; // жёлтый треугольник с чёрным восклицательным знаком
+            warn.title = 'В этой комнате есть жильцы с уникальной ценой';
+            title.appendChild(warn);
+          }
+
+          const badge = document.createElement('div');
+          badge.className = 'badge';
+          const occupied = residents.filter(v => v[2] == room[0] && (v[9] === 'active' || v[9] === 'samoplatce')).length;
+          badge.textContent = `${occupied}/${parseInt(room[3],10)||0}`;
+          if (!roomActive) badge.style.display = 'none';
+
+          tile.appendChild(title);
+          tile.appendChild(badge);
+          grid.appendChild(tile);
+        });
+      }
+
+      
+      function initResidentsView(params) {
+        var roomId = params.roomId;
+        window.currentResidents = residents.filter(function(resident) {
+          return resident[2] == roomId && 
+                (resident[9] === "active" || resident[9] === "samoplatce" || resident[9] === "marked");
+        }).sort(function(a, b) {
+          return a[5].localeCompare(b[5]);
+        });
+        renderResidents();
+        var dorm = dormitories.find(function(d) { return d[0] == params.dormitoryId; });
+        if (dorm) {
+          document.getElementById("breadcrumbDormitory").textContent = dorm[1];
+        }
+        var room = currentRooms.find(function(r) { return r[0] == roomId; });
+        if (room) {
+          document.getElementById("breadcrumbRoom").textContent = room[2];
+        }
+      }
+      
+      function renderResidents() {
+        var list = document.getElementById('residentList');
+        list.innerHTML = "";
+        currentResidents.forEach(function(resident) {
+          var item = document.createElement("div");
+          item.className = "list-item";
+
+          // имя
+          const nameSpan = document.createElement('span');
+          nameSpan.textContent = resident[5] + " " + resident[6];
+          item.appendChild(nameSpan);
+
+          // ЕСЛИ есть уникальная цена — показываем ⚠️
+          const hasUnique = resident[10] != null &&
+                            String(resident[10]).trim() !== '' &&
+                            Number(resident[10]) > 0;
+          if (hasUnique) {
+            const warn = document.createElement('span');
+            warn.className = 'warn-icon';
+            warn.textContent = '⚠️';
+            warn.title = 'Уникальная цена жилья';
+            item.appendChild(warn);
+          }
+
+          // Если статус "marked", отображаем текст красным
+          if (resident[9] === "marked") {
+            item.style.color = "red";
+          }
+
+          // long press / context menu — как было
+          let pressTimer;
+          let longPressTriggered = false;
+          item.addEventListener("touchstart", function(e) {
+            longPressTriggered = false;
+            selectedTileElement = item;
+            pressTimer = setTimeout(function() {
+              longPressTriggered = true;
+              e.preventDefault();
+              item.classList.add("highlight");
+              showResidentContextMenu(resident, e.touches[0].clientY);
+            }, 1000);
+          });
+          item.addEventListener("touchend", function(e) {
+            clearTimeout(pressTimer);
+          });
+          item.addEventListener("click", function(e) {
+            if (!longPressTriggered && !contextMenuOpen) {
+              navigate('resident', {residentId: resident[0], roomId: currentParams.roomId, dormitoryId: currentParams.dormitoryId});
+            }
+          });
+
+          list.appendChild(item);
+        });
+      }
+
+      function showResidentContextMenu(resident, touchY) {
+        selectedResident = resident;
+        contextMenuOpen = true;
+        var menu = document.getElementById("residentContextMenu");
+        if (selectedTileElement) {
+          var rect = selectedTileElement.getBoundingClientRect();
+          // Проверяем, выйдет ли меню за нижнюю границу экрана
+          if (rect.bottom + menu.offsetHeight > window.innerHeight) {
+            // Выводим меню сверху плитки
+            menu.style.top = (rect.top - menu.offsetHeight) + "px";
+          } else {
+            // Выводим меню снизу
+            menu.style.top = rect.bottom + "px";
+          }
+          // Расположим меню по правой стороне или задайте нужное позиционирование:
+          menu.style.right = "10px";
+          menu.style.position = "fixed";
+        } else {
+          menu.style.top = (touchY - menu.offsetHeight/2) + "px";
+        }
+        menu.classList.remove("hidden");
+        setTimeout(function(){
+          document.addEventListener("click", hideContextMenuOnClick);
+        }, 0);
+      }
+      
+      function hideContextMenuOnClick(e) {
+        var menu = document.getElementById("residentContextMenu");
+        if (!menu.contains(e.target)) {
+          menu.classList.add("hidden");
+          contextMenuOpen = false;
+          document.removeEventListener("click", hideContextMenuOnClick);
+          if (selectedTileElement) {
+            selectedTileElement.classList.remove("highlight");
+            selectedTileElement = null;
+          }
+        }
+      }
+      
+      function hideResidentContextMenu() {
+        document.getElementById("residentContextMenu").classList.add("hidden");
+        contextMenuOpen = false;
+      }
+      
+      function contextEditResident() {
+        hideResidentContextMenu();
+        navigate('addResident', {residentId: selectedResident[0], roomId: currentParams.roomId, dormitoryId: currentParams.dormitoryId});
+      }
+      
+      function contextEvictResident() {
+        hideResidentContextMenu();
+        document.getElementById("evictModalMessage").textContent = "Вы действительно хотите выселить " + selectedResident[5] + " " + selectedResident[6] + "?";
+        document.getElementById("evictDate").valueAsDate = new Date();
+        document.getElementById("evictModal").style.display = "block";
+      }
+      
+      function closeEvictModal() {
+        document.getElementById("evictModal").style.display = "none";
+      }
+      
+      function confirmEvictionModal() {
+        var dateVal = document.getElementById("evictDate").value;
+        var evictionDate = "";
+        if(dateVal) {
+          var parts = dateVal.split("-");
+          evictionDate = parts[2] + "." + parts[1] + "." + parts[0];
+        }
+        google.script.run.withSuccessHandler(function() {
+          alert(selectedResident[5] + " " + selectedResident[6] + " выселен");
+          closeEvictModal();
+          navigate('residents', {roomId: currentParams.roomId, dormitoryId: currentParams.dormitoryId});
+        }).evictResident(selectedResident[0], evictionDate);
+      }
+      
+      function showDormContextMenu(dorm, touchY) {
+        var menu = document.getElementById("dormContextMenu");
+        if (selectedDormTileElement) {
+          var rect = selectedDormTileElement.getBoundingClientRect();
+          // Расположим меню по центру плитки:
+          menu.style.top = rect.top + (rect.height - menu.offsetHeight) / 2 + "px";
+          menu.style.left = rect.left + (rect.width - menu.offsetWidth) / 2 + "px";
+          menu.style.position = "fixed";
+        } else {
+          menu.style.top = (touchY - menu.offsetHeight/2) + "px";
+        }
+        menu.classList.remove("hidden");
+        setTimeout(function(){
+          document.addEventListener("click", hideDormContextMenuOnClick);
+        }, 0);
+      }
+
+      function hideDormContextMenuOnClick(e) {
+        var menu = document.getElementById("dormContextMenu");
+        if (!menu.contains(e.target)) {
+          menu.classList.add("hidden");
+          document.removeEventListener("click", hideDormContextMenuOnClick);
+          if (selectedDormTileElement) {
+            selectedDormTileElement.classList.remove("highlight");
+            selectedDormTileElement = null;
+          }
+        }
+      }
+      
+      function hideDormContextMenu() {
+        document.getElementById("dormContextMenu").classList.add("hidden");
+      }
+      
+      function contextEditDormitory() {
+        hideDormContextMenu();
+        openEditDormitoryModal(selectedDormitory);
+      }
+      
+      function showRoomContextMenu(room, touchY) {
+        var menu = document.getElementById("roomContextMenu");
+        if (selectedRoomTileElement) {
+          var rect = selectedRoomTileElement.getBoundingClientRect();
+          if (rect.bottom + menu.offsetHeight > window.innerHeight) {
+            menu.style.top = (rect.top - menu.offsetHeight) + "px";
+          } else {
+            menu.style.top = rect.bottom + "px";
+          }
+          menu.style.right = "10px";
+          menu.style.position = "fixed";
+        } else {
+          menu.style.top = (touchY - menu.offsetHeight/2) + "px";
+        }
+        menu.classList.remove("hidden");
+        setTimeout(function(){
+          document.addEventListener("click", hideRoomContextMenuOnClick);
+        }, 0);
+      }
+
+      function hideRoomContextMenuOnClick(e) {
+        var menu = document.getElementById("roomContextMenu");
+        if (!menu.contains(e.target)) {
+          menu.classList.add("hidden");
+          document.removeEventListener("click", hideRoomContextMenuOnClick);
+          if (selectedRoomTileElement) {
+            selectedRoomTileElement.classList.remove("highlight");
+            selectedRoomTileElement = null;
+          }
+        }
+      }
+      
+      function hideRoomContextMenu() {
+        document.getElementById("roomContextMenu").classList.add("hidden");
+      }
+      
+      function contextEditRoom() {
+        hideRoomContextMenu();
+        openEditRoomModal(selectedRoom);
+      }
+      
+      function openEditRoomModal(room) {
+        editingRoomId = room[0];
+        document.getElementById("roomModal").style.display = "block";
+        document.getElementById("roomModalTitle").textContent = "Редактировать комнату";
+        document.getElementById("roomNameInput").value = room[2];
+        document.getElementById("roomCapacityInput").value = room[3];
+        document.getElementById("roomInactiveCheckbox").checked = !room[4];
+        document.getElementById("roomModal").style.display = "block";
+      }
+      
+      function openAddDormitoryModal() {
+        editingDormId = null;
+        document.getElementById("dormModalTitle").textContent = "Новое общежитие";
+        document.getElementById("dormNameInput").value = "";
+        document.getElementById("dormCityInput").value = "";
+        document.getElementById("dormImageInput").value = "";
+        document.getElementById("dormModal").style.display = "block";
+        document.getElementById("dormInactiveCheckbox").checked = false;//
+      }
+      
+      function closeDormModal() {
+        document.getElementById("dormModal").style.display = "none";
+      }
+      
+      /**
+       * Сохраняет общежитие: добавляет новое или обновляет существующее.
+       */
+      function saveDormitory() {
+        // Считываем значения из полей
+        const name = document.getElementById("dormNameInput").value.trim();
+        const city = document.getElementById("dormCityInput").value.trim();
+        const imageUrl = document.getElementById("dormImageInput").value.trim();
+        // Если чекбокс "Неактивно" отмечен — isActive = false
+        const isActive = !document.getElementById("dormInactiveCheckbox").checked;
+
+        // Проверка обязательного поля Название
+        if (!name) {
+          alert("Пожалуйста, укажите название общежития.");
+          return;
+        }
+
+        if (editingDormId) {
+          // Обновляем существующее общежитие
+          google.script
+            .run
+            .withSuccessHandler(() => {
+              // Обновляем локальный массив
+              for (let i = 0; i < dormitories.length; i++) {
+                if (dormitories[i][0] == editingDormId) {
+                  dormitories[i][1] = name;
+                  dormitories[i][2] = city;
+                  dormitories[i][3] = imageUrl;
+                  dormitories[i][4] = isActive;
+                  break;
+                }
+              }
+              renderDormitories();
+              closeDormModal();
+              editingDormId = null;
+            })
+            .updateDormitory(editingDormId, name, city, imageUrl, isActive);
+        } else {
+          // Добавляем новое общежитие
+          google.script
+            .run
+            .withSuccessHandler(newId => {
+              dormitories.push([newId, name, city, imageUrl, isActive]);
+              renderDormitories();
+              closeDormModal();
+            })
+            .addDormitory(name, city, imageUrl, isActive);
+        }
+      }
+
+      
+      function openAddRoomModal() {
+        editingRoomId = null;
+        document.getElementById("roomInactiveCheckbox").checked = false;
+        document.getElementById("roomModal").style.display = "block";
+      }
+      
+      function closeRoomModal() {
+        document.getElementById("roomModal").style.display = "none";
+      }
+      
+      
+      function closeEvictModal() {
+        document.getElementById("evictModal").style.display = "none";
+      }
+      
+      function showMainMenuDropdown(e) {
+        var dropdown = document.getElementById("mainMenuDropdown");
+        var btn = document.getElementById("menuButton");
+        var rect = btn.getBoundingClientRect();
+        dropdown.style.top = rect.bottom + "px";
+        dropdown.style.right = "10px";
+        dropdown.style.position = "fixed";
+        dropdown.classList.remove("hidden");
+        setTimeout(function() {
+          document.addEventListener("click", hideMainMenuDropdownOnClick);
+        }, 0);
+      }
+      
+      function hideMainMenuDropdownOnClick(e) {
+        var dropdown = document.getElementById("mainMenuDropdown");
+        var btn = document.getElementById("menuButton");
+        if (!dropdown.contains(e.target) && e.target !== btn) {
+          dropdown.classList.add("hidden");
+          document.removeEventListener("click", hideMainMenuDropdownOnClick);
+        }
+      }
+      
+      function initOverviewView() {
+        var container = document.getElementById("overviewContainer");
+        container.innerHTML = "";
+        dormitories.forEach(function(dorm) {
+          var dormDiv = document.createElement("div");
+          dormDiv.style.marginBottom = "20px";
+          var dormTitle = document.createElement("h2");
+          dormTitle.textContent = dorm[1];
+          dormDiv.appendChild(dormTitle);
+          var dormRooms = rooms.filter(function(room) {
+            return room[1] == dorm[0];
+          });
+          dormRooms.forEach(function(room) {
+            var roomDiv = document.createElement("div");
+            roomDiv.style.marginLeft = "20px";
+            var roomTitle = document.createElement("h3");
+            roomTitle.textContent = room[2];
+            roomDiv.appendChild(roomTitle);
+            var roomResidents = residents.filter(function(resident) {
+              return resident[2] == room[0] && (resident[9] === "active" || resident[9] === "samoplatce");
+            });
+            roomResidents.forEach(function(resident) {
+              var resP = document.createElement("p");
+              resP.style.marginLeft = "40px";
+              resP.textContent = resident[5] + " " + resident[6] + " (Заселён: " + formatDateString(resident[3]) + ")";
+              roomDiv.appendChild(resP);
+            });
+            dormDiv.appendChild(roomDiv);
+          });
+          container.appendChild(dormDiv);
+        });
+      }
+      
+      (function() {
+        var urlParams = new URLSearchParams(window.location.search);
+        var view = urlParams.get('view') || 'index';
+        var params = {};
+        urlParams.forEach(function(value, key) {
+          if (key !== 'view') { params[key] = value; }
+        });
+        history.replaceState({view: view, params: params}, '', window.location.href);
+        renderView(view, params);
+      })();
+      
+      // Модальное окно переселения
+      function contextRelocateResident() {
+        hideResidentContextMenu();
+        currentRelocateTarget = { dormitoryId: null, roomId: null };
+        var dropdown = document.getElementById("relocateDormitoryDropdown");
+        dropdown.innerHTML = "";
+        dormitories.forEach(function(dorm) {
+          var btn = document.createElement("button");
+          btn.textContent = dorm[1];
+          btn.onclick = function() {
+            currentRelocateTarget.dormitoryId = dorm[0];
+            selectRelocateDormitory(dorm[0]);
+          };
+          dropdown.appendChild(btn);
+        });
+        if (selectedTileElement) {
+          var rect = selectedTileElement.getBoundingClientRect();
+          dropdown.style.top = rect.bottom + "px";
+          dropdown.style.right = "10px";
+          dropdown.style.position = "fixed";
+        } else {
+          dropdown.style.top = "50%";
+          dropdown.style.right = "10px";
+        }
+        dropdown.classList.remove("hidden");
+        setTimeout(function(){
+          document.addEventListener("click", hideRelocateDropdownOnClick);
+        }, 0);
+      }
+      
+      function hideRelocateDropdownOnClick(e) {
+        var dropdown = document.getElementById("relocateDormitoryDropdown");
+        if (!dropdown.contains(e.target)) {
+          dropdown.classList.add("hidden");
+          document.removeEventListener("click", hideRelocateDropdownOnClick);
+          if (selectedTileElement) {
+            selectedTileElement.classList.remove("highlight");
+            selectedTileElement = null;
+          }
+        }
+      }
+      
+      function selectRelocateDormitory(dormitoryId) {
+        document.getElementById("relocateDormitoryDropdown").classList.add("hidden");
+        var dropdown = document.getElementById("relocateRoomDropdown");
+        dropdown.innerHTML = "";
+        var filteredRooms = rooms.filter(function(room) {
+          return room[1] == dormitoryId;
+        });
+        filteredRooms.forEach(function(room) {
+          var btn = document.createElement("button");
+          btn.textContent = room[2];
+          btn.onclick = function() {
+            currentRelocateTarget.roomId = room[0];
+            document.getElementById("relocateDate").valueAsDate = new Date();
+            document.getElementById("relocateModal").style.display = "block";
+            document.getElementById("relocateModalMessage").textContent = "Вы действительно хотите переселить " + selectedResident[5] + " " + selectedResident[6] + "?";
+          };
+          dropdown.appendChild(btn);
+        });
+        if (selectedTileElement) {
+          var rect = selectedTileElement.getBoundingClientRect();
+          dropdown.style.top = rect.bottom + "px";
+          dropdown.style.right = "10px";
+          dropdown.style.position = "fixed";
+        } else {
+          dropdown.style.top = "50%";
+          dropdown.style.right = "10px";
+        }
+        dropdown.classList.remove("hidden");
+        setTimeout(function(){
+          document.addEventListener("click", hideRelocateRoomDropdownOnClick);
+        }, 0);
+      }
+      
+      function hideRelocateRoomDropdownOnClick(e) {
+        var dropdown = document.getElementById("relocateRoomDropdown");
+        if (!dropdown.contains(e.target)) {
+          dropdown.classList.add("hidden");
+          document.removeEventListener("click", hideRelocateRoomDropdownOnClick);
+          if (selectedTileElement) {
+            selectedTileElement.classList.remove("highlight");
+            selectedTileElement = null;
+          }
+        }
+      }
+      
+      function closeRelocateModal() {
+        document.getElementById("relocateModal").style.display = "none";
+      }
+      
+      function confirmRelocation() {
+        var dateVal = document.getElementById("relocateDate").value;
+        var relocationDate = "";
+        if(dateVal) {
+          var parts = dateVal.split("-");
+          relocationDate = parts[2] + "." + parts[1] + "." + parts[0];
+        }
+        google.script.run.withSuccessHandler(function(newId) {
+          alert(selectedResident[5] + " " + selectedResident[6] + " переселен");
+          closeRelocateModal();
+          navigate('residents', {roomId: currentParams.roomId, dormitoryId: currentParams.dormitoryId});
+        }).relocateResident(selectedResident[0], currentRelocateTarget.dormitoryId, currentRelocateTarget.roomId, relocationDate);
+      }
+      
+      function initAddResidentView(params) {
+        var residentId = params.residentId;
+        if (!residentId) {
+          document.getElementById("checkInDate").valueAsDate = new Date();
+        } else {
+          document.getElementById("pageTitle").textContent = "Редактировать жильца";
+          var resident = residents.find(function(r) { return r[0] == residentId; });
+          if (resident) {
+            var parts = formatDateString(resident[3]).split(".");
+            document.getElementById("checkInDate").value = parts[2] + "-" + parts[1] + "-" + parts[0];
+            document.getElementById("surname").value = resident[5];
+            document.getElementById("name").value = resident[6];
+            document.getElementById("phone").value = resident[7];
+            document.getElementById("note").value = resident[8];
+            if (resident[9] !== "active") {
+              document.getElementById("samoplatceCheckbox").checked = true;
+            }
+          }
+        }
+        var btn = document.querySelector(".container button");
+        if(btn){
+          btn.textContent = residentId ? "Сохранить" : "Заселить";
+        }
+      }
+      
+      // Для выселения используем модальное окно (initEvictResidentView)
+      function initEvictResidentView(params) {
+        var resident = residents.find(function(r) { return r[0] == params.residentId; });
+        if(resident){
+          document.getElementById("evictModalMessage").textContent = "Вы действительно хотите выселить " + resident[5] + " " + resident[6] + "?";
+        }
+        document.getElementById("evictDate").valueAsDate = new Date();
+        document.getElementById("evictModal").style.display = "block";
+      }
+
+      function initLogsView() {
+        var list = document.getElementById("logList");
+        list.innerHTML = "";
+        // Берём копию массива и переворачиваем её, чтобы вывести свежие записи первыми
+        logs.slice().reverse().forEach(function(log) {
+          var item = document.createElement("div");
+          item.className = "list-item";
+          item.innerHTML =
+            "<p><strong>Дата:</strong> " + log[0] + "</p>" +
+            "<p><strong>Аккаунт:</strong> " + log[1] + "</p>" +
+            "<p><strong>Жилец:</strong> " + log[2] + "</p>" +
+            "<p><strong>Детали:</strong> " + log[3] + "</p>";
+          list.appendChild(item);
+        });
+      }
+      
+      function initSearchView(params) {
+        var query = params.query || "";
+        var results = residents.filter(function(item) {
+          var surname = item[5].toString().toLowerCase().replace(/\s/g, "");
+          var name = item[6].toString().toLowerCase().replace(/\s/g, "");
+          return surname.indexOf(query.toLowerCase().replace(/\s/g, "")) !== -1 ||
+                name.indexOf(query.toLowerCase().replace(/\s/g, "")) !== -1;
+        });
+        var list = document.getElementById("searchResultsList");
+        list.innerHTML = "";
+        if (results.length === 0) {
+          list.innerHTML = "<p style='font-size:3rem; text-align:center; margin:2em 0'>Нет результатов.</p>";
+          return;
+        }
+        results.forEach(function(itemData) {
+          var div = document.createElement("div");
+          div.className = "list-item";
+
+          // имя
+          const nameSpan = document.createElement('span');
+          nameSpan.textContent = itemData[5] + " " + itemData[6];
+          div.appendChild(nameSpan);
+
+          // ⚠️ если уникальная цена
+          const hasUnique = itemData[10] != null &&
+                            String(itemData[10]).trim() !== '' &&
+                            Number(itemData[10]) > 0;
+          if (hasUnique) {
+            const warn = document.createElement('span');
+            warn.className = 'warn-icon';
+            warn.textContent = '⚠️';
+            warn.title = 'Уникальная цена жилья';
+            div.appendChild(warn);
+          }
+
+          // long press / переход — как было
+          let pressTimer;
+          let longPressTriggered = false;
+          div.addEventListener("touchstart", function(e) {
+            longPressTriggered = false;
+            selectedTileElement = div;
+            pressTimer = setTimeout(function() {
+              longPressTriggered = true;
+              e.preventDefault();
+              div.classList.add("highlight");
+              showResidentContextMenu(itemData, e.touches[0].clientY);
+            }, 1000);
+          });
+          div.addEventListener("touchend", function(e) {
+            clearTimeout(pressTimer);
+          });
+          div.addEventListener("click", function(e) {
+            if (!longPressTriggered && !contextMenuOpen) {
+              navigate('resident', {residentId: itemData[0], dormitoryId: itemData[1], roomId: itemData[2]});
+            }
+          });
+
+          list.appendChild(div);
+        });
+      }
+      
+      function openEditDormitoryModal(dorm) {
+        editingDormId = dorm[0];
+        document.getElementById("dormModalTitle").textContent = "Редактировать общежитие";
+        document.getElementById("dormNameInput").value = dorm[1];
+        document.getElementById("dormCityInput").value = dorm[2];
+        document.getElementById("dormImageInput").value = dorm[3];
+        document.getElementById("dormInactiveCheckbox").checked = !dorm[4];
+        document.getElementById("dormModal").style.display = "block";
+      }
+      
+      /**
+       * Сохраняет комнату: добавляет новую или обновляет существующую.
+       */
+      function saveRoom() {
+        // Считываем значения из полей
+        const name = document.getElementById("roomNameInput").value.trim();
+        const capacity = document.getElementById("roomCapacityInput").value;
+        // Если чекбокс "Неактивна" отмечен — isActive = false
+        const isActive = !document.getElementById("roomInactiveCheckbox").checked;
+
+        // Проверка обязательного поля Название
+        if (!name) {
+          alert("Пожалуйста, укажите название комнаты.");
+          return;
+        }
+
+        if (editingRoomId) {
+          // Обновляем существующую комнату
+          google.script
+            .run
+            .withSuccessHandler(() => {
+              // Обновляем локальный массив rooms
+              for (let i = 0; i < rooms.length; i++) {
+                if (rooms[i][0] == editingRoomId) {
+                  rooms[i][2] = name;
+                  rooms[i][3] = capacity;
+                  rooms[i][4] = isActive;
+                  break;
+                }
+              }
+              // Обновляем текущий список, если он задан
+              if (window.currentRooms) {
+                for (let i = 0; i < currentRooms.length; i++) {
+                  if (currentRooms[i][0] == editingRoomId) {
+                    currentRooms[i][2] = name;
+                    currentRooms[i][3] = capacity;
+                    currentRooms[i][4] = isActive;
+                    break;
+                  }
+                }
+              }
+              renderRooms();
+              closeRoomModal();
+              editingRoomId = null;
+            })
+            .updateRoom(editingRoomId, name, capacity, isActive);
+
+        } else {
+          // Добавляем новую комнату
+          google.script
+            .run
+            .withSuccessHandler(newId => {
+              const newRoom = [newId, currentParams.dormitoryId, name, capacity, isActive];
+              rooms.push(newRoom);
+              if (window.currentRooms) {
+                currentRooms.push(newRoom);
+              }
+              renderRooms();
+              closeRoomModal();
+            })
+            .addRoom(currentParams.dormitoryId, name, capacity, isActive);
+        }
+      }
+
+      function saveResident() {
+        var dateVal = document.getElementById("checkInDate").value; // формат yyyy-mm-dd
+        var checkInDate = "";
+        if(dateVal) {
+          var parts = dateVal.split("-");
+          checkInDate = parts[2] + "." + parts[1] + "." + parts[0];
+        }
+        var surname = document.getElementById("surname").value.trim();
+        var name = document.getElementById("name").value.trim();
+        var phone = document.getElementById("phone").value.trim();
+        var uniquePrice = parseFloat(document.getElementById("uniquePrice").value) || 0;
+        var note = document.getElementById("note").value.trim();
+        var status = document.getElementById("samoplatceCheckbox").checked ? "samoplatce" : "active";
+        
+        if (!checkInDate || !surname || !name) {
+          alert("Пожалуйста, заполните все обязательные поля.");
+          return;
+        }
+        if (currentParams.residentId) {
+          google.script.run.withSuccessHandler(function() {
+            alert("Данные успешно обновлены");
+            navigate('residents', {roomId: currentParams.roomId, dormitoryId: currentParams.dormitoryId});
+          }).updateResident(currentParams.residentId, checkInDate, surname, name, phone, note);
+        } else {
+          google.script.run
+            .withSuccessHandler(function(newId) {
+              alert("Данные успешно добавлены");
+              var newResident = [newId, currentParams.dormitoryId, currentParams.roomId, checkInDate, "", surname, name, phone, note, status, uniquePrice];
+              residents.push(newResident);
+              currentResidents.push(newResident);
+              navigate('residents', {roomId: currentParams.roomId, dormitoryId: currentParams.dormitoryId});
+            })
+            .withFailureHandler(function(error) {
+              // Показываем сообщение, полученное с сервера
+              alert(error.message);
+            })
+            .addResident(currentParams.dormitoryId, currentParams.roomId, checkInDate, surname, name, phone, note, status, uniquePrice);
+        }
+      }
+      
+      function initResidentView(params) {
+        var residentId = params.residentId;
+        var resident = residents.find(function(r) { return r[0] == residentId; });
+        if (!resident) { 
+          alert("Данные о жильце не найдены"); 
+          return; 
+        }
+        // Если параметры не переданы, берем их из записи жильца
+        if (!params.dormitoryId) params.dormitoryId = resident[1];
+        if (!params.roomId) params.roomId = resident[2];
+
+        document.getElementById("residentName").textContent = resident[5] + " " + resident[6];
+        var detailsDiv = document.getElementById("residentDetails");
+        detailsDiv.innerHTML = "";
+        var fields = [
+          {label: "Фамилия", value: resident[5]},
+          {label: "Имя", value: resident[6]},
+          {label: "Дата заселения", value: formatDateString(resident[3])},
+          {label: "Дата выселения", value: resident[4] ? formatDateString(resident[4]) : "-"},
+          {label: "Номер телефона", value: resident[7]},
+          {label: "Уникальная цена жилья", value: resident[10]},
+          {label: "Примечание", value: resident[8]}
+        ];
+        fields.forEach(function(field) {
+          var div = document.createElement("div");
+          div.className = "detail-item";
+
+          if (field.label === "Дата выселения"
+              && resident[9] 
+              && resident[9].startsWith("relocated")) {
+            // Если статус записи — relocated или relocated samoplatce
+            div.innerHTML = 
+              "<strong>" + field.label + ":</strong> " 
+              + field.value 
+              + " <span class='relocate-icon'>🔄</span>";
+          } else {
+            div.innerHTML = "<strong>" + field.label + ":</strong> " + field.value;
+          }
+
+          detailsDiv.appendChild(div);
+        });
+        var dorm = dormitories.find(function(d) { return d[0] == params.dormitoryId; });
+        if (dorm) {
+          document.getElementById("breadcrumbDormitory").textContent = dorm[1];
+        }
+        // Вместо вызова getRoomById используем поиск в глобальном массиве rooms
+        var room = rooms.find(function(r) { return r[0] == params.roomId; });
+        if (room) {
+          document.getElementById("breadcrumbRoom").textContent = room[2];
+        }
+      }
+
+      // Функция для обработки нажатия кнопки "На удаление"
+      function contextMarkForDeletion() {
+        hideResidentContextMenu();
+        document.getElementById("markModal").style.display = "block";
+      }
+
+
+      // Функция для обработки нажатия кнопки "Удалить"
+      // Эта кнопка будет доступна только для пользователя dmitrii.bogdanov@humanasset.cz
+      function contextDeleteResident() {
+        hideResidentContextMenu();
+        // Проверим, если текущий пользователь не dmitrii.bogdanov@humanasset.cz, не выполняем действие.
+        if (window.currentUserEmail !== "dmitrii.bogdanov@humanasset.cz") {
+          alert("У вас нет прав на удаление жильца.");
+          return;
+        }
+        if (confirm("Вы действительно хотите полностью удалить этого жильца? Это действие нельзя отменить.")) {
+          google.script.run.withSuccessHandler(function() {
+            alert("Жилец удалён.");
+            // Перезагружаем список жильцов
+            navigate('residents', { roomId: currentParams.roomId, dormitoryId: currentParams.dormitoryId });
+          }).deleteResident(selectedResident[0]);
+        }
+      }
+
+      function closeMarkModal() {
+        document.getElementById("markModal").style.display = "none";
+      }
+
+      function confirmMarkDeletion() {
+        google.script.run.withSuccessHandler(function() {
+          alert("Жилец отмечен для удаления.");
+          if (selectedTileElement) {
+            selectedTileElement.style.color = "red";
+          }
+          selectedResident[9] = "marked";
+        }).markResidentForDeletion(selectedResident[0]);
+        closeMarkModal();
+      }
+
+
+      // --- Новая цель для «Перезаселить» ---
+      let currentResettleTarget = { dormitoryId: null, roomId: null };
+
+      // Открывает список общежитий для «Перезаселить»
+      function contextResettleResident() {
+        hideResidentContextMenu();
+        currentResettleTarget = { dormitoryId: null, roomId: null };
+
+        const dormDD = document.getElementById("relocateDormitoryDropdown");
+        dormDD.innerHTML = "";
+        dormitories.forEach(dorm => {
+          const btn = document.createElement("button");
+          btn.textContent = dorm[1];
+          btn.onclick = () => selectResettleDormitory(dorm[0]);
+          dormDD.appendChild(btn);
+        });
+
+        // позиционирование как в contextRelocateResident
+        const rect = selectedTileElement
+          ? selectedTileElement.getBoundingClientRect()
+          : document.getElementById("menuButton").getBoundingClientRect();
+        dormDD.style.top = rect.bottom + "px";
+        dormDD.style.right = "10px";
+        dormDD.style.position = "fixed";
+        dormDD.classList.remove("hidden");
+
+        setTimeout(() => {
+          document.addEventListener("click", hideResettleDropdownOnClick);
+        }, 0);
+      }
+
+      function hideResettleDropdownOnClick(e) {
+        const dd = document.getElementById("relocateDormitoryDropdown");
+        if (!dd.contains(e.target)) {
+          dd.classList.add("hidden");
+          document.removeEventListener("click", hideResettleDropdownOnClick);
+        }
+      }
+
+      function selectResettleDormitory(dormitoryId) {
+        document.getElementById("relocateDormitoryDropdown").classList.add("hidden");
+
+        const roomDD = document.getElementById("relocateRoomDropdown");
+        roomDD.innerHTML = "";
+        rooms.filter(r => r[1] == dormitoryId).forEach(room => {
+          const btn = document.createElement("button");
+          btn.textContent = room[2];
+          btn.onclick = () => {
+            currentResettleTarget = { dormitoryId, roomId: room[0] };
+            const modal = document.getElementById("relocateModal");
+            document.getElementById("relocateDate").valueAsDate = new Date();
+            document.getElementById("relocateModalMessage").textContent =
+              `Вы действительно хотите перезаселить ${selectedResident[5]} ${selectedResident[6]}?`;
+            modal.style.display = "block";
+            // тут переопределяем действие кнопки «Подтвердить»
+            modal.querySelector(".modal-content button").onclick = confirmResettlement;
+          };
+          roomDD.appendChild(btn);
+        });
+
+        // позиционирование как в selectRelocateDormitory
+        const rect = selectedTileElement
+          ? selectedTileElement.getBoundingClientRect()
+          : document.getElementById("menuButton").getBoundingClientRect();
+        roomDD.style.top = rect.bottom + "px";
+        roomDD.style.right = "10px";
+        roomDD.style.position = "fixed";
+        roomDD.classList.remove("hidden");
+
+        setTimeout(() => {
+          document.addEventListener("click", hideResettleRoomDropdownOnClick);
+        }, 0);
+      }
+
+      function hideResettleRoomDropdownOnClick(e) {
+        const dd = document.getElementById("relocateRoomDropdown");
+        if (!dd.contains(e.target)) {
+          dd.classList.add("hidden");
+          document.removeEventListener("click", hideResettleRoomDropdownOnClick);
+        }
+      }
+
+      // Подтверждение «Перезаселить»
+      function confirmResettlement() {
+        const dateVal = document.getElementById("relocateDate").value;
+        let relocationDate = "";
+        if (dateVal) {
+          const [y, m, d] = dateVal.split("-");
+          relocationDate = `${d}.${m}.${y}`;
+        }
+        google.script
+          .run
+          .withSuccessHandler(newId => {
+            alert(`${selectedResident[5]} ${selectedResident[6]} перезаселен`);
+            closeRelocateModal();
+            navigate("residents", {
+              roomId: currentParams.roomId,
+              dormitoryId: currentParams.dormitoryId
+            });
+          })
+          .reRelocateResident(
+            selectedResident[0],
+            currentResettleTarget.dormitoryId,
+            currentResettleTarget.roomId,
+            relocationDate
+          );
+      }
+
+
+      /**
+       * Обработчик кнопки «Инструкция» в контекстном меню жильца
+       */
+      function contextResidentInstruction() {
+        hideResidentContextMenu();  // прячем меню
+        showToast(
+          'Если вы перемещаете жильца между объектами жильца или комнатами - выбирайте "переселить".\n' +
+          '\n' +
+          'Если нужно, чтобы жилец с какой-то даты не платил за жильё - выбирайте "перезаселить".'
+        );
+      }
+
+      /**
+       * Показывает «тоаст» с переданным сообщением на 12 секунд
+       */
+      function showToast(message) {
+        var toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.classList.add('show');
+        setTimeout(function() {
+          toast.classList.remove('show');
+        }, 12000);
+      }
+      
+
+    </script>
+    <div id="toast" class="toast"></div>
+  </body>
+</html>
